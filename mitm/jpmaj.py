@@ -46,7 +46,7 @@ class JpMahjongRoom():
                             )
         if  data.get("type")=="end_game":
             self.check_destroy()
-            
+
     def check_destroy(self):
         bridge_to_destroy = []
         for uid,bridge in self.jpmaj_bridges.items():
@@ -115,7 +115,7 @@ async def check_room_timeout():
             logger.info(f"当前房间数: {ridCnt},用户数: {uidCnt}")
             print_memory_usage()
             # 每30秒检查一次
-            await asyncio.sleep(30)
+            await asyncio.sleep(60)
         except Exception as e:
             logger.error(f"检查房间超时时出错: {e}", exc_info=True)
 
