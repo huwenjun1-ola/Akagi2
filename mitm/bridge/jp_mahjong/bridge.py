@@ -78,6 +78,8 @@ class JpMahjongBridge(BridgeBase):
             msgType=parsed_msg.get("type")
             if  msgType== "start_game":
                 parsed_msg["id"] = self.seat
+            if  msgType== "end_game":
+                self.lastMsgTimestamp=0
             if msgType=="start_kyoku" :
                 tmpCards=['?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?']
                 lcards=[]

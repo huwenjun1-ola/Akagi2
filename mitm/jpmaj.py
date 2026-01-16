@@ -29,9 +29,9 @@ class JpMahjongRoom():
         self.jpmaj_bridges={}
 
     def OnMsg(self,mjai_message ):
+        data = mjai_message.get("Data")
         for bridge in self.jpmaj_bridges.values():
             if bridge is not None:
-                data = mjai_message.get("Data")
                 msgs = bridge.parse(data)
                 if debug_uid == bridge.uid:
                     for m in msgs:
@@ -44,6 +44,9 @@ class JpMahjongRoom():
                                 f"{nsq_receiver.MahjongTopic}.reply",
                                 reply
                             )
+        if  data.get("type")=="end_game":
+            self.check_destroy()
+            
     def check_destroy(self):
         bridge_to_destroy = []
         for uid,bridge in self.jpmaj_bridges.items():
