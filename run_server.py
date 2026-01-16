@@ -1,9 +1,20 @@
 import os
 import sys
 import tomllib
-from entry import entry
+# 创建统一的日志管理器
 from loguru import logger as main_logger
+import os
 
+def safe_add_handler(*args, **kwargs):
+    """安全添加日志处理器"""
+    return None
+
+# 替换原始的 add 方法
+if os.environ.get("LOGURU_WRITEFILE", "1") == "0":
+    original_add = main_logger.add
+    main_logger.add = safe_add_handler
+
+from entry import entry
 from settings.settings import settings
 
 if __name__ == '__main__':
@@ -19,10 +30,4 @@ if __name__ == '__main__':
             main_logger.info(f"apply config from go,host:{host},port:{port}")
     except Exception as e:
         pass
-    if os.environ.get("LOGURU_WRITEFILE", "1") == "0":
-        main_logger.remove()
-        # 2. 重新添加：仅绑定标准输出和标准错误
-        # 通常建议：INFO 及以下去 stdout，WARNING 及以上去 stderr
-        main_logger.add(sys.stdout, level="DEBUG")
-        main_logger.add(sys.stderr, level="WARNING")
     entry.main()
