@@ -16,7 +16,7 @@ if __name__ == '__main__':
             host,port=addr.split(":")
             settings.mitm.host = host
             settings.mitm.port = port
-            main_logger.debug(f"apply config from go,host:{host},port:{port}")
+            main_logger.info(f"apply config from go,host:{host},port:{port}")
     except Exception as e:
         pass
     if os.environ.get("LOGURU_WRITEFILE", "1") == "0":

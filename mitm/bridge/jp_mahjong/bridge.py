@@ -74,7 +74,6 @@ class JpMahjongBridge(BridgeBase):
         try:
             self.lastMsgTimestamp = time.time()
             # 直接解析MJAI格式的消息
-            logger.debug(f"Received MJAI message: {parsed_msg}")
             parsed_msg=copy.deepcopy(parsed_msg)
             msgType=parsed_msg.get("type")
             if  msgType== "start_game":
@@ -114,33 +113,36 @@ class JpMahjongBridge(BridgeBase):
             return None
 
     def execute(self,msgs)   :
-        logger.debug(f"execute1 { self.uid} { self.seat} { msgs}")
+        try:
+            logger.debug(f"execute1 {self.rid}  { self.uid} { self.seat} { msgs}")
 
-        mjai_response =self.mjai_controller.react(msgs)
-        logger.debug(f"execute2 { self.uid} {mjai_response} ")
+            mjai_response =self.mjai_controller.react(msgs)
+            logger.debug(f"execute2 {self.rid}  { self.uid} {mjai_response} ")
 
-        if "meta" not in mjai_response:
-            return
-        if "q_values" not in mjai_response["meta"]:
-            return
-        meta = mjai_response["meta"]
-        recommends: list[tuple[str, float]] = meta_to_recommend(meta,False)[0:8]
-        lActions = []
-        for i in range(len(recommends)):
-            recommend=recommends[i]
-            lActions.append({
-                "Action": recommend[0],
-                "Ratio": recommend[1],
-            })
-        reply_msg={
-            "Rid": self.rid,
-            "Uid": self.uid,
-            "Type":mjai_response["type"],
-            "Actions": lActions,
-        }
-        reply=json.dumps(reply_msg)
-        logger.debug(f"execute3 { self.uid}  { reply}")
-        return reply
+            if "meta" not in mjai_response:
+                return
+            if "q_values" not in mjai_response["meta"]:
+                return
+            meta = mjai_response["meta"]
+            recommends: list[tuple[str, float]] = meta_to_recommend(meta,False)[0:8]
+            lActions = []
+            for i in range(len(recommends)):
+                recommend=recommends[i]
+                lActions.append({
+                    "Action": recommend[0],
+                    "Ratio": recommend[1],
+                })
+            reply_msg={
+                "Rid": self.rid,
+                "Uid": self.uid,
+                "Type":mjai_response["type"],
+                "Actions": lActions,
+            }
+            reply=json.dumps(reply_msg)
+            logger.debug(f"execute3 {self.rid}  { self.uid}  { reply}")
+            return reply
+        except Exception as e:
+            logger.error(f"Error executing command: {e}")
 
     def is_timeout(self):
         return time.time() - self.lastMsgTimestamp > timeout_seconds

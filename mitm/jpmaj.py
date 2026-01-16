@@ -38,10 +38,11 @@ class JpMahjongRoom():
                 else:
                     reply = bridge.execute(msgs)
                     if reply:
-                        nsq_receiver.publish_akagi_events(
-                            f"{nsq_receiver.MahjongTopic}.reply",
-                            reply
-                        )
+                        if nsq_receiver:
+                            nsq_receiver.publish_akagi_events(
+                                f"{nsq_receiver.MahjongTopic}.reply",
+                                reply
+                            )
     def check_destroy(self):
         bridge_to_destroy = []
         for uid,bridge in self.jpmaj_bridges.items():
@@ -73,11 +74,14 @@ async def check_room_timeout():
     while True:
         try:
             rooms_to_destroy = []
-            
+            ridCnt=0
+            uidCnt=0
             # 使用锁保护读取gRoomMap
             with room_manager_lock:
                 # 检查所有房间
                 for room_id, room in gRoomManager.gRoomMap.items():
+                    ridCnt+=1
+                    uidCnt+=len(room.jpmaj_bridges)
                     room.check_destroy()
                     if not room.jpmaj_bridges:
                         rooms_to_destroy.append(room_id)
@@ -88,7 +92,7 @@ async def check_room_timeout():
                         logger.info(f"房间 {room_id} 超时超过3分钟，正在销毁...")
                         del gRoomManager.gRoomMap[room_id]
                         logger.info(f"房间 {room_id} 已销毁")
-            
+            logger.warning(f"当前房间数: {ridCnt},用户数: {uidCnt}")
             # 每30秒检查一次
             await asyncio.sleep(30)
         except Exception as e:
@@ -177,7 +181,7 @@ def on_room_new_message(message):
     try:
         # 解码消息体
         mjai_message=RoomNewMessage.from_dict( message)
-        logger.debug(f"on_room_new_message Received MJAI message: {mjai_message}")
+        logger.debug(f"on_room_new_message : {mjai_message}")
         room=JpMahjongRoom(mjai_message.Rid)
         gRoomManager.gRoomMap[mjai_message.Rid]=room
         for obj in mjai_message.Robots:
