@@ -127,7 +127,7 @@ async def start_proxy(host, port):
     if len(arr) == 2:
         debug_uid = int(arr[0])
         host = arr[1]
-    logger.info(f"Starting nsq proxy server at {host}:{port}")
+    logger.info(f"{os.getpid()} Starting nsq proxy server at {host}:{port}")
     global nsq_receiver
     nsq_receiver = JpMahjongNsqReceiver()
     # 创建接收器实例

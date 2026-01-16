@@ -19,7 +19,7 @@ class Application:
 
     def signal_handler(self, signum, frame):
         """处理信号的回调函数"""
-        logger.info(f"Received signal {signum}, shutting down gracefully...")
+        logger.info(f"{os.getpid()} Received signal {signum}, shutting down gracefully...")
         global gRoomManager
         with room_manager_lock:
             gRoomManager.isStopping=True
@@ -44,7 +44,7 @@ class Application:
             time.sleep(5)  # 减少睡眠时间，增加检查频率
         
         stop_proxy()
-        logger.info("Akagi stopped")
+        logger.info(f"{os.getpid()} Akagi stopped")
         sys.exit(0)
 
     def run(self):
