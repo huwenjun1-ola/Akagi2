@@ -76,7 +76,7 @@ class Bot:
         for e in events:
             if e["type"] == "start_game":
                 self.player_id = e["id"]
-                self.model = model.load_model(self.player_id)
+                self.model = model.load_model2(self.player_id)
                 continue
             if self.model is None or self.player_id is None:
                 logger.error(f"Model is not loaded yet")

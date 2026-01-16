@@ -412,3 +412,64 @@ def load_model(seat: int) -> Bot:
 
     bot = Bot(engine, seat)
     return bot
+
+
+# 定义一个全局字典用于缓存模型
+_MODEL_CACHE = {}
+
+
+def get_shared_models(device):
+    """
+    确保模型只被加载一次并返回
+    """
+    if 'mortal' in _MODEL_CACHE:
+        return _MODEL_CACHE['mortal'], _MODEL_CACHE['dqn'], _MODEL_CACHE['version']
+
+    # --- 以下是原有的加载逻辑，只运行一次 ---
+    control_state_file = pathlib.Path(__file__).parent / "./mortal.pth"
+    state = torch.load(control_state_file, map_location=device)
+
+    version = state['config']['control']['version']
+
+    mortal = Brain(
+        version=version,
+        conv_channels=state['config']['resnet']['conv_channels'],
+        num_blocks=state['config']['resnet']['num_blocks']
+    ).to(device).eval()  # 移动到设备并设为推理模式
+
+    dqn = DQN(version=version).to(device).eval()
+
+    mortal.load_state_dict(state['mortal'])
+    dqn.load_state_dict(state['current_dqn'])
+
+    # 存入缓存
+    _MODEL_CACHE['mortal'] = mortal
+    _MODEL_CACHE['dqn'] = dqn
+    _MODEL_CACHE['version'] = version
+
+    return mortal, dqn, version
+
+
+def load_model2(seat: int) -> Bot:
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
+
+    # 获取（或加载）共享的模型实例
+    mortal, dqn, version = get_shared_models(device)
+
+    # 多个 Engine 实例共享同一个 mortal 和 dqn 对象
+    engine = MortalEngine(
+        mortal,  # 引用传递
+        dqn,  # 引用传递
+        is_oracle=False,
+        version=version,
+        device=device,
+        enable_amp=False,
+        enable_quick_eval=False,
+        enable_rule_based_agari_guard=True,
+        name='mortal',
+    )
+
+    return Bot(engine, seat)
