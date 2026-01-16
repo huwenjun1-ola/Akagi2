@@ -46,6 +46,8 @@ class JpMahjongRoom():
                             )
         if  data.get("type")=="end_game":
             self.check_destroy()
+            return True
+        return None
 
     def check_destroy(self):
         bridge_to_destroy = []
@@ -238,7 +240,10 @@ def on_room_robot_message(message):
 
         room = gRoomManager.gRoomMap[rid]
         if room is not None:
-            room.OnMsg(mjai_message)
+            if room.OnMsg(mjai_message):
+                with room_manager_lock:
+                    del gRoomManager.gRoomMap[rid]
+                    logger.info(f"房间 {rid} 已销毁")
 
     except Exception as e:
         logger.error(f"[Handler] Error handling MJAI message: {e}", exc_info=True)
