@@ -1,15 +1,10 @@
-import asyncio
 import os
 import sys
 import time
-import tomllib
 
-import psutil
-
-from entry import entry
 from loguru import logger as main_logger
 
-from mitm.jpmaj import on_room_robot_message, on_room_new_message, gRoomManager, check_room_timeout
+from mitm.jpmaj import  on_room_new_message, gRoomManager,  print_memory_usage
 
 flag="Received MJAI message: {"
 print(os.getpid())
@@ -17,7 +12,7 @@ main_logger.remove()
 # 2. 重新添加：仅绑定标准输出和标准错误
 # 通常建议：INFO 及以下去 stdout，WARNING 及以上去 stderr
 main_logger.add(sys.stderr, level="WARNING")
-# main_logger.add(sys.stdout, level="DEBUG")
+main_logger.add(sys.stdout, level="INFO")
 
 
 def parse_log():
@@ -71,22 +66,7 @@ def mockRoom(lMsg,rid):
             traceback.print_exc()
 
 
-def print_memory_usage():
-    """打印当前进程的内存占用"""
-    process = psutil.Process(os.getpid())
-    memory_info = process.memory_info()
 
-    # 获取内存占用信息
-    rss = memory_info.rss / 1024 / 1024  # 转换为MB
-    vms = memory_info.vms / 1024 / 1024  # 转换为MB
-
-    main_logger.error(f"PID: {os.getpid()}")
-    main_logger.error(f"物理内存占用 (RSS): {rss:.2f} MB")
-    main_logger.error(f"虚拟内存占用 (VMS): {vms:.2f} MB")
-
-    # 还可以获取内存百分比
-    memory_percent = process.memory_percent()
-    main_logger.error(f"内存使用率: {memory_percent:.2f}%")
 
 
 if __name__ == '__main__':
@@ -94,13 +74,13 @@ if __name__ == '__main__':
     with open('game_akagi.log', 'rb') as f:
         for line in f.readlines():
             lMsg.append(line.strip())
-    for rid in range(1,100):
-        main_logger.error(f"rid : {rid}")
+    for rid in range(0,1):
+        main_logger.info(f"rid : {rid}")
         mockRoom(lMsg,rid)
         print_memory_usage()
 
 
-    main_logger.error("done")
+    main_logger.info("done")
     while 1:
         time.sleep(10)
         print_memory_usage()

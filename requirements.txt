@@ -15,3 +15,4 @@ numpy==2.1.2
 
 # NSQ
 pynsq==0.9.1
+psutil==7.2.1

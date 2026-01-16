@@ -114,10 +114,10 @@ class JpMahjongBridge(BridgeBase):
 
     def execute(self,msgs)   :
         try:
-            logger.debug(f"execute1 {self.rid}  { self.uid} { self.seat} { msgs}")
+            logger.debug(f"{self.rid}  execute1 { self.uid} { self.seat} { msgs}")
 
             mjai_response =self.mjai_controller.react(msgs)
-            logger.debug(f"execute2 {self.rid}  { self.uid} {mjai_response} ")
+            logger.debug(f"{self.rid}  execute2 { self.uid} { self.seat} {mjai_response} ")
 
             if "meta" not in mjai_response:
                 return
@@ -139,7 +139,7 @@ class JpMahjongBridge(BridgeBase):
                 "Actions": lActions,
             }
             reply=json.dumps(reply_msg)
-            logger.debug(f"execute3 {self.rid}  { self.uid}  { reply}")
+            logger.debug(f"{self.rid}  execute3 { self.uid} { self.seat}  { reply}")
             return reply
         except Exception as e:
             logger.error(f"Error executing command: {e}")

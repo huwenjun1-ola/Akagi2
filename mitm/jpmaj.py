@@ -12,6 +12,7 @@ import mitmproxy.http
 import mitmproxy.log
 import mitmproxy.tcp
 import mitmproxy.websocket
+import psutil
 from mitmproxy import proxy, options, ctx
 from mitmproxy.tools.dump import DumpMaster
 from .bridge import JpMahjongBridge
@@ -67,6 +68,22 @@ nsq_receiver:JpMahjongNsqReceiver=None
 debug_uid=0
 timeout_seconds = 3 * 60  # 3分钟超时
 
+def print_memory_usage():
+    """打印当前进程的内存占用"""
+    process = psutil.Process(os.getpid())
+    memory_info = process.memory_info()
+
+    # 获取内存占用信息
+    rss = memory_info.rss / 1024 / 1024  # 转换为MB
+    vms = memory_info.vms / 1024 / 1024  # 转换为MB
+
+    logger.info(f"PID: {os.getpid()}")
+    logger.info(f"物理内存占用 (RSS): {rss:.2f} MB")
+    logger.info(f"虚拟内存占用 (VMS): {vms:.2f} MB")
+
+    # 还可以获取内存百分比
+    memory_percent = process.memory_percent()
+    logger.info(f"内存使用率: {memory_percent:.2f}%")
 
 # 添加定期检查房间超时的任务
 async def check_room_timeout():
@@ -92,7 +109,8 @@ async def check_room_timeout():
                         logger.info(f"房间 {room_id} 超时超过3分钟，正在销毁...")
                         del gRoomManager.gRoomMap[room_id]
                         logger.info(f"房间 {room_id} 已销毁")
-            logger.warning(f"当前房间数: {ridCnt},用户数: {uidCnt}")
+            logger.info(f"当前房间数: {ridCnt},用户数: {uidCnt}")
+            print_memory_usage()
             # 每30秒检查一次
             await asyncio.sleep(30)
         except Exception as e:
@@ -181,7 +199,7 @@ def on_room_new_message(message):
     try:
         # 解码消息体
         mjai_message=RoomNewMessage.from_dict( message)
-        logger.debug(f"on_room_new_message : {mjai_message}")
+        logger.info(f"on_room_new_message : {mjai_message}")
         room=JpMahjongRoom(mjai_message.Rid)
         gRoomManager.gRoomMap[mjai_message.Rid]=room
         for obj in mjai_message.Robots:
