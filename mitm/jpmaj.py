@@ -41,7 +41,7 @@ class JpMahjongRoom():
                     if reply:
                         if nsq_receiver:
                             nsq_receiver.publish_akagi_events(
-                                f"{nsq_receiver.MahjongTopic}.reply",
+                                f"{nsq_receiver.MahjongTopic}.reply#ephemeral",
                                 reply
                             )
         if  data.get("type")=="end_game":
@@ -139,8 +139,8 @@ async def start_proxy(host, port):
         logger.info(f"[start_proxy] Subscribing to NSQ events...")
         try:
             await nsq_receiver.subscribe_to_akagi_events(
-                nsq_receiver.MahjongTopic,
-                f"akagi_channel_{os.getpid()}",
+                f"{nsq_receiver.MahjongTopic}#ephemeral",
+                f"akagi_channel_{os.getpid()}#ephemeral",
                 on_room_robot_message
             )
             logger.info("[start_proxy] NSQ subscription successful, keeping connection alive...")
