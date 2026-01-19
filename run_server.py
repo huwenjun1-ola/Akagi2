@@ -19,7 +19,10 @@ from settings.settings import settings
 
 if __name__ == '__main__':
     try:
-        with open('../config/config.toml', 'rb') as f:
+        cfgPath="./config/config.toml"
+        if not os.path.exists(cfgPath):
+            cfgPath=f"../{cfgPath}"
+        with open(cfgPath, 'rb') as f:
             data = tomllib.load(f)
             dNsq=data.get("go-nsq")
             lAddrs=dNsq.get("game")
