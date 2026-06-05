@@ -27,8 +27,6 @@ class Controller(object):
                 continue
             if item == "base":
                 continue
-            if item == "mortal3p":
-                continue
             dir_path = os.path.join(current_dir, item)
             # Check if folder and has a bot.py file
             if os.path.isdir(dir_path) and os.path.exists(os.path.join(dir_path, "bot.py")):

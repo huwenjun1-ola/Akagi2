@@ -89,6 +89,13 @@ class JpMahjongBridge(BridgeBase):
                     else:
                         lcards.append(tmpCards)
                 parsed_msg["tehais"]=lcards
+                if (
+                        parsed_msg["scores"][0] == 35000 and
+                        parsed_msg["scores"][1] == 35000 and
+                        parsed_msg["scores"][2] == 35000 and
+                        parsed_msg["scores"][3] == 0
+                ):
+                    self.is_3p = True
             if msgType=="tsumo" and self.seat!=parsed_msg.get("actor"):
                 parsed_msg["pai"]='?'
             # 返回MJAI消息列表
@@ -126,7 +133,7 @@ class JpMahjongBridge(BridgeBase):
             if "q_values" not in mjai_response["meta"]:
                 return
             meta = mjai_response["meta"]
-            recommends: list[tuple[str, float]] = meta_to_recommend(meta,False)[0:8]
+            recommends: list[tuple[str, float]] = meta_to_recommend(meta,self.is_3p)[0:8]
             lActions = []
             for i in range(len(recommends)):
                 recommend=recommends[i]
